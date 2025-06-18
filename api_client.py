@@ -163,7 +163,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             f"{self.config.base_url}/messages",
             headers=headers,
             json=data,
-            timeout=30
+            timeout=1000
         )
         
         if response.status_code != 200:
@@ -188,7 +188,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             }
         }
         
-        response = requests.post(url, json=data, timeout=30)
+        response = requests.post(url, json=data, timeout=1000)
         
         if response.status_code != 200:
             raise Exception(f"Google API error: {response.text}")
@@ -219,7 +219,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             model_url,
             headers=headers,
             json=data,
-            timeout=60  # HuggingFace can be slower
+            timeout=1000  # HuggingFace can be slower
         )
         
         if response.status_code == 503:
@@ -251,7 +251,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             f"{self.config.base_url}/chat",
             headers=headers,
             json=data,
-            timeout=30
+            timeout=1000
         )
         
         if response.status_code != 200:
@@ -277,7 +277,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             response = requests.post(
                 f"{self.config.base_url}/chat/completions",
                 json=data,
-                timeout=30
+                timeout=1500
             )
         except requests.exceptions.ConnectionError:
             raise Exception(
@@ -313,7 +313,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             response = requests.post(
                 f"{self.config.base_url}/generate",
                 json=data,
-                timeout=60  # Ollama can be slow
+                timeout=1000  # Ollama can be slow
             )
         except requests.exceptions.ConnectionError:
             raise Exception(
@@ -353,7 +353,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             self.config.base_url,
             headers=headers,
             json=data,
-            timeout=30
+            timeout=1000
         )
         
         if response.status_code != 200:
