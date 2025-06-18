@@ -20,6 +20,7 @@ class APIConfig:
     api_key: Optional[str] = None
     base_url: str = ""
     model: str = ""
+    lm_studio_timeout: Optional[int] = 120
 
     def __post_init__(self):
         """Set provider-specific default URLs"""

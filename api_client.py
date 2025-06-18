@@ -134,6 +134,9 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
 
     def _send_lm_studio_message(self, message: str) -> str:
         """Send message via LM Studio API"""
+        # Determine timeout for LM Studio
+        timeout = self.config.lm_studio_timeout if self.config.lm_studio_timeout is not None else 120
+
         data = {
             "model": self.config.model,
             "messages": [
@@ -149,7 +152,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             response = requests.post(
                 f"{self.config.base_url}/chat/completions",
                 json=data,
-                timeout=30
+                timeout=timeout
             )
         except requests.exceptions.ConnectionError:
             raise Exception(

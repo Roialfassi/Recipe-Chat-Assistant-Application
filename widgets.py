@@ -431,6 +431,16 @@ class SettingsPanel(QGroupBox):
         self.model_combo.currentTextChanged.connect(lambda text: self.model_input.setText(text) if text else None)
         layout.addWidget(self.model_combo, 2, 2)
 
+        # LM Studio Timeout
+        layout.addWidget(self._create_label("LM Studio Timeout (s):"), 3, 0)
+        self.lm_studio_timeout_spinbox = QSpinBox()
+        self.lm_studio_timeout_spinbox.setMinimum(1)
+        self.lm_studio_timeout_spinbox.setMaximum(9999)
+        self.lm_studio_timeout_spinbox.setSingleStep(10)
+        self.lm_studio_timeout_spinbox.setValue(APIConfig().lm_studio_timeout) # Default from model
+        self.lm_studio_timeout_spinbox.setStyleSheet(self._get_input_style())
+        layout.addWidget(self.lm_studio_timeout_spinbox, 3, 1, 1, 2)
+
         # Buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(8)
@@ -445,7 +455,7 @@ class SettingsPanel(QGroupBox):
         self.save_button.clicked.connect(self.save_settings_requested)
         button_layout.addWidget(self.save_button)
 
-        layout.addLayout(button_layout, 3, 0, 1, 3)
+        layout.addLayout(button_layout, 4, 0, 1, 3) # Adjusted row index
 
         self.setLayout(layout)
 
@@ -520,15 +530,17 @@ class SettingsPanel(QGroupBox):
 
     def _on_provider_changed(self, provider_name: str):
         """Handle provider change"""
-        if provider_name == "OpenAI":
+        if provider_name == APIProvider.OPENAI.value: # Check against Enum value
             self.api_key_input.setEnabled(True)
             self.api_key_input.setPlaceholderText("Enter your OpenAI API key")
+            self.lm_studio_timeout_spinbox.setEnabled(False) # Disable for OpenAI
             self.model_combo.clear()
             self.model_combo.addItems(["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"])
             self.model_input.setText("gpt-3.5-turbo")
-        else:  # LM Studio
+        elif provider_name == APIProvider.LM_STUDIO.value:  # Check against Enum value
             self.api_key_input.setEnabled(False)
             self.api_key_input.setPlaceholderText("Not required for LM Studio")
+            self.lm_studio_timeout_spinbox.setEnabled(True) # Enable for LM Studio
             self.model_combo.clear()
             self.model_combo.addItem("Click 'Refresh Models' to load")
             self.model_input.setPlaceholderText("Enter model name or refresh to see available")
@@ -539,6 +551,7 @@ class SettingsPanel(QGroupBox):
         provider = APIProvider(self.provider_combo.currentText())
         api_key = self.api_key_input.text() if provider == APIProvider.OPENAI else None
         model = self.model_input.text().strip()
+        lm_timeout = self.lm_studio_timeout_spinbox.value()
 
         if provider == APIProvider.OPENAI and not api_key:
             QMessageBox.warning(self, "Missing API Key", "Please enter your OpenAI API key")
@@ -548,7 +561,7 @@ class SettingsPanel(QGroupBox):
             QMessageBox.warning(self, "No Model Selected", "Please enter or select a model")
             return None
 
-        return APIConfig(provider=provider, api_key=api_key, model=model)
+        return APIConfig(provider=provider, api_key=api_key, model=model, lm_studio_timeout=lm_timeout)
 
     def set_models(self, models: List[str]):
         """Set available models in dropdown"""
