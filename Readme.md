@@ -33,7 +33,7 @@ A **modern, chat‑style desktop application** that lets you converse naturally 
 
 ```bash
 # 1. Clone the repository
-$ git clone https://github.com/roialfassi/recipe‑chat‑assistant.git
+$ git clone https://github.com/Roialfassi/Recipe-Chat-Assistant-Application.git
 $ cd recipe‑chat‑assistant
 
 # 2. Create & activate a virtual environment
@@ -42,13 +42,10 @@ $ python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\ac
 # 3. Install dependencies
 $ pip install -r requirements.txt
 
-# 4. Export an API key (OpenAI) **or** start LM Studio locally
-$ export OPENAI_API_KEY="sk‑..."               # for OpenAI
-# ‑‑‑ OR ‑‑‑
-$ # LM Studio must be running with an API endpoint, e.g. http://localhost:1234
-
-# 5. Run the app
+# 4. Run the app
 $ python main.py
+
+# add the api key the model and provider you want to use and start getting recipes
 ```
 
 > **Tip:** In *SettingsModels* you can pick *gpt‑4o*, *phi‑3‑mini‑128k*, or type any custom LM Studio model identifier.
