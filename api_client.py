@@ -136,7 +136,7 @@ Important: Provide ONLY the JSON response, no additional text before or after.""
             f"{self.config.base_url}/chat/completions",
             headers=headers,
             json=data,
-            timeout=30
+            timeout=1000
         )
         
         self._handle_openai_errors(response)
