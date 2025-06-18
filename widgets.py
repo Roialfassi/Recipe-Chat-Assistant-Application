@@ -544,7 +544,8 @@ class SettingsPanel(QGroupBox):
             QMessageBox.warning(self, "Missing API Key", "Please enter your OpenAI API key")
             return None
 
-        if not model:
+        if not model and provider != APIProvider.LM_STUDIO:
+            # print ("model - ",model)
             QMessageBox.warning(self, "No Model Selected", "Please enter or select a model")
             return None
 

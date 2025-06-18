@@ -10,7 +10,13 @@ from typing import List, Optional, Dict, Any
 class APIProvider(Enum):
     """Supported API providers"""
     OPENAI = "OpenAI"
-    LM_STUDIO = "LM Studio"
+    ANTHROPIC = "Anthropic (Claude)"
+    GOOGLE = "Google (Gemini)"
+    HUGGINGFACE = "HuggingFace"
+    COHERE = "Cohere"
+    LM_STUDIO = "LM Studio (Local)"
+    OLLAMA = "Ollama (Local)"
+    CUSTOM = "Custom API"
 
 
 @dataclass
@@ -21,13 +27,25 @@ class APIConfig:
     base_url: str = ""
     model: str = ""
 
+    # Additional settings for specific providers
+    organization_id: Optional[str] = None  # For OpenAI
+    project_id: Optional[str] = None  # For Google
+    custom_headers: Dict[str, str] = field(default_factory=dict)
+
     def __post_init__(self):
         """Set provider-specific default URLs"""
         if not self.base_url:
-            if self.provider == APIProvider.OPENAI:
-                self.base_url = "https://api.openai.com/v1"
-            elif self.provider == APIProvider.LM_STUDIO:
-                self.base_url = "http://localhost:1234/v1"
+            defaults = {
+                APIProvider.OPENAI: "https://api.openai.com/v1",
+                APIProvider.ANTHROPIC: "https://api.anthropic.com/v1",
+                APIProvider.GOOGLE: "https://generativelanguage.googleapis.com/v1beta",
+                APIProvider.HUGGINGFACE: "https://api-inference.huggingface.co/models",
+                APIProvider.COHERE: "https://api.cohere.ai/v1",
+                APIProvider.LM_STUDIO: "http://localhost:1234/v1",
+                APIProvider.OLLAMA: "http://localhost:11434/api",
+                APIProvider.CUSTOM: ""
+            }
+            self.base_url = defaults.get(self.provider, "")
 
 
 @dataclass
@@ -44,6 +62,95 @@ class ParsedRecipe:
     tips: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
     nutrition: Dict[str, str] = field(default_factory=dict)
+
+
+# ============== Provider Configurations ==============
+@dataclass
+class ProviderInfo:
+    """Information about an API provider"""
+    name: str
+    requires_api_key: bool
+    supports_streaming: bool
+    supports_json_mode: bool
+    default_models: List[str]
+    api_key_help: str
+    setup_instructions: str
+
+
+PROVIDER_INFO = {
+    APIProvider.OPENAI: ProviderInfo(
+        name="OpenAI",
+        requires_api_key=True,
+        supports_streaming=True,
+        supports_json_mode=True,
+        default_models=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"],
+        api_key_help="Get your API key from https://platform.openai.com/api-keys",
+        setup_instructions="Enter your OpenAI API key and select a model."
+    ),
+    APIProvider.ANTHROPIC: ProviderInfo(
+        name="Anthropic",
+        requires_api_key=True,
+        supports_streaming=True,
+        supports_json_mode=False,
+        default_models=["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+        api_key_help="Get your API key from https://console.anthropic.com/",
+        setup_instructions="Enter your Anthropic API key and select a Claude model."
+    ),
+    APIProvider.GOOGLE: ProviderInfo(
+        name="Google Gemini",
+        requires_api_key=True,
+        supports_streaming=True,
+        supports_json_mode=False,
+        default_models=["gemini-pro", "gemini-pro-vision"],
+        api_key_help="Get your API key from https://makersuite.google.com/app/apikey",
+        setup_instructions="Enter your Google AI API key and select a Gemini model."
+    ),
+    APIProvider.HUGGINGFACE: ProviderInfo(
+        name="HuggingFace",
+        requires_api_key=True,
+        supports_streaming=False,
+        supports_json_mode=False,
+        default_models=["mistralai/Mixtral-8x7B-Instruct-v0.1", "meta-llama/Llama-2-70b-chat-hf", "google/flan-t5-xxl"],
+        api_key_help="Get your API token from https://huggingface.co/settings/tokens",
+        setup_instructions="Enter your HuggingFace API token and model name."
+    ),
+    APIProvider.COHERE: ProviderInfo(
+        name="Cohere",
+        requires_api_key=True,
+        supports_streaming=True,
+        supports_json_mode=False,
+        default_models=["command", "command-light", "command-nightly"],
+        api_key_help="Get your API key from https://dashboard.cohere.ai/api-keys",
+        setup_instructions="Enter your Cohere API key and select a model."
+    ),
+    APIProvider.LM_STUDIO: ProviderInfo(
+        name="LM Studio",
+        requires_api_key=False,
+        supports_streaming=True,
+        supports_json_mode=False,
+        default_models=[],
+        api_key_help="No API key required for local models",
+        setup_instructions="Start LM Studio server and enter your model name."
+    ),
+    APIProvider.OLLAMA: ProviderInfo(
+        name="Ollama",
+        requires_api_key=False,
+        supports_streaming=True,
+        supports_json_mode=False,
+        default_models=["llama2", "mistral", "codellama", "vicuna"],
+        api_key_help="No API key required for local models",
+        setup_instructions="Start Ollama and enter a model name (e.g., 'llama2')."
+    ),
+    APIProvider.CUSTOM: ProviderInfo(
+        name="Custom API",
+        requires_api_key=True,
+        supports_streaming=False,
+        supports_json_mode=False,
+        default_models=[],
+        api_key_help="Enter credentials as required by your custom API",
+        setup_instructions="Configure base URL, API key, and model as needed."
+    ),
+}
 
 
 # ============== Theme Configuration ==============
@@ -92,7 +199,7 @@ class AppTheme:
         # UI elements
         'background': '#F5F5F5',
         'text_primary': '#212121',
-        'text_secondary': '#0a0a0a',
+        'text_secondary': '#757575',
         'border': '#E0E0E0',
         'error': '#F44336',
         'success': '#4CAF50',
