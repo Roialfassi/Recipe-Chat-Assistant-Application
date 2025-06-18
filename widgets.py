@@ -437,7 +437,7 @@ class SettingsPanel(QGroupBox):
         self.lm_studio_timeout_spinbox.setMinimum(1)
         self.lm_studio_timeout_spinbox.setMaximum(9999)
         self.lm_studio_timeout_spinbox.setSingleStep(10)
-        self.lm_studio_timeout_spinbox.setValue(APIConfig().lm_studio_timeout) # Default from model
+        # self.lm_studio_timeout_spinbox.setValue(APIConfig().lm_studio_timeout) # Default from model
         self.lm_studio_timeout_spinbox.setStyleSheet(self._get_input_style())
         layout.addWidget(self.lm_studio_timeout_spinbox, 3, 1, 1, 2)
 
